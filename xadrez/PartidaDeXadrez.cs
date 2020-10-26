@@ -17,6 +17,7 @@ namespace xadrez_console.xadrez
         private HashSet<Peca> capturadas;
         public bool xeque { get; private set; }
         public Peca vulneravelEnPassant { get; private set; }
+        public Peca peaoEmPromocao { get; private set; }
 
         public PartidaDeXadrez()
         {
@@ -25,6 +26,7 @@ namespace xadrez_console.xadrez
             jogadorAtual = Cor.Branca;
             terminada = false;
             vulneravelEnPassant = null;
+            peaoEmPromocao = null;
             pecas = new HashSet<Peca>();
             capturadas = new HashSet<Peca>();
             colocarPecas();
@@ -59,12 +61,12 @@ namespace xadrez_console.xadrez
                 tab.colocarPeca(T, destinoT);
             }
             // #jogadaespecial en passant
-            if(p is Peao)
+            if (p is Peao)
             {
-                if(origem.coluna != destino.coluna && pecaCapturada == null)
+                if (origem.coluna != destino.coluna && pecaCapturada == null)
                 {
                     Posicao posP;
-                    if(p.cor == Cor.Branca)
+                    if (p.cor == Cor.Branca)
                     {
                         posP = new Posicao(destino.linha + 1, destino.coluna);
                     }
@@ -88,7 +90,7 @@ namespace xadrez_console.xadrez
                 tab.colocarPeca(pecaCapturada, destino);
                 capturadas.Remove(pecaCapturada);
             }
-           
+
             tab.colocarPeca(p, origem);
 
             //#jogadaespecial roque pequeno
@@ -111,13 +113,13 @@ namespace xadrez_console.xadrez
                 tab.colocarPeca(T, origemT);
             }
             //#jogadaespecial en passant
-            if(p is Peao)
+            if (p is Peao)
             {
                 if (origem.coluna != destino.coluna && pecaCapturada == vulneravelEnPassant)
                 {
                     Peca peao = tab.retirarPeca(destino);
                     Posicao posP;
-                    if(p.cor == Cor.Branca)
+                    if (p.cor == Cor.Branca)
                     {
                         posP = new Posicao(3, destino.coluna);
                     }
@@ -142,15 +144,35 @@ namespace xadrez_console.xadrez
             Peca p = tab.peca(destino);
 
             // #jogadaespecial promocao
-            if(p is Peao)
+            if (p is Peao)
             {
-                if(p.cor == Cor.Branca && destino.linha == 0 || (p.cor == Cor.Preta && destino.linha == 7))
+                if (p.cor == Cor.Branca && destino.linha == 0 || (p.cor == Cor.Preta && destino.linha == 7))
                 {
                     p = tab.retirarPeca(destino);
                     pecas.Remove(p);
-                    Peca dama = new Dama(tab, p.cor);
-                    tab.colocarPeca(dama, destino);
-                    pecas.Add(dama);
+                    Peca pecaPromovida = new Dama(tab, p.cor);
+                    Console.Write("Escolha uma classe para promover seu peão: ");
+                    string classe = Console.ReadLine();
+                    if (classe == "C")
+                    {
+                        pecaPromovida = new Cavalo(tab, p.cor);
+                    }
+                    else if(classe == "B")
+                    {
+                        pecaPromovida = new Bispo(tab, p.cor);
+                    }
+                    else if (classe == "T")
+                    {
+                        pecaPromovida = new Torre(tab, p.cor);
+                    }
+                    else if (classe == "D")
+                    {
+                        pecaPromovida = new Dama(tab, p.cor);
+                    }
+
+
+                    tab.colocarPeca(pecaPromovida, destino);
+                    pecas.Add(pecaPromovida);
                 }
             }
 
@@ -171,11 +193,11 @@ namespace xadrez_console.xadrez
                 turno++;
                 mudaJogador();
             }
-            
+
 
 
             //#jogadaespecial en passant
-            if(p is Peao && (destino.linha == origem.linha - 2 || destino.linha == destino.linha + 2))
+            if (p is Peao && (destino.linha == origem.linha - 2 || destino.linha == destino.linha + 2))
             {
                 vulneravelEnPassant = p;
             }
@@ -183,7 +205,16 @@ namespace xadrez_console.xadrez
             {
                 vulneravelEnPassant = null;
             }
+            //#jogadaespecial promocao
+            if (p is Peao && destino.linha== 0 && p.cor == Cor.Branca)
+            {
+                 
+
+                
+
+            }
         }
+
 
         public void validarPosicaoDeOrigem(Posicao pos)
         {
@@ -267,6 +298,11 @@ namespace xadrez_console.xadrez
             }
             return null;
         }
+        
+
+
+
+
         public bool estaEmXeque(Cor cor)
         {
             Peca R = rei(cor);

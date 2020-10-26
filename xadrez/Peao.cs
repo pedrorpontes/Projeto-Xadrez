@@ -9,9 +9,13 @@ namespace xadrez
     class Peao : Peca
     {
         private PartidaDeXadrez partida;
+        public bool promocao { get; private set; } = false;
+
         public Peao(Tabuleiro tab, Cor cor, PartidaDeXadrez partida) : base(tab, cor)
         {
             this.partida = partida;
+            this.promocao = false;
+            
         }
         public override string ToString()
         {
